@@ -42,6 +42,12 @@ int main(int argc, char const *argv[]) {
     i++;
 
   }
-  sleep(2);
+  /**
+   Wait till all threads are complete before main thread  continues. Else there isa risk of running a exit before completion of all Thread. We can do it by joining threads or wait forsome time using sleep (not a good way)
+  */
+  pthread_join(tid[0],NULL);
+  pthread_join(tid[1],NULL);
+  pthread_join(tid[2],NULL);
+  //sleep(2);
   return 0;
 }
