@@ -11,8 +11,8 @@ void* smoker(void *arg)
 {
   /**
     *## smoker code ##
-    * smoker makes cigarette passes the control back to agent
-    * smokes smokes for 5 sec before contending again
+    * smoker makes cigarette, passes the control back to agent
+    * smoker smokes for 5 sec before contending again
   **/
   int i=0;
   pthread_t id =pthread_self();
