@@ -9,6 +9,11 @@ sem_t distributer,paper_match,tobacco_match,paper_tobacco;
 
 void* smoker(void *arg)
 {
+  /**
+    *## smoker code ##
+    * smoker makes cigarette passes the control back to agent
+    * smokes smokes for 5 sec before contending again
+  **/
   int i=0;
   pthread_t id =pthread_self();
 
@@ -52,6 +57,14 @@ void* smoker(void *arg)
 
 void* table(void *arg)
 {
+  /** ## Agent code ##
+    * Agent randomly put two elements on table
+      paper_match
+      paper_tobacco
+      tobacco_match
+    * on the basis of request put by smoker and elements available he gets chance
+    * The agent wait for very short time (neded for making a cigarette)
+  **/
   int i=0;
   pthread_t id =pthread_self();
 
@@ -77,12 +90,13 @@ void* table(void *arg)
 int main(int argc, char const *argv[])
 {
   int i=0;
+  //Semaphore initialization
   sem_init(&distributer,0,1);
   sem_init(&paper_match,0,0);
   sem_init(&paper_tobacco,0,0);
   sem_init(&tobacco_match,0,0);
 
-
+  //Thread creation for smoker and agent
   pthread_create(&agent,NULL,&table,NULL);
   pthread_create(&smoker1,NULL,&smoker,NULL);
   pthread_create(&smoker2,NULL,&smoker,NULL);
@@ -90,7 +104,7 @@ int main(int argc, char const *argv[])
 
 
   //printf("Waiting all for all threads to exit\n");
-
+  // Wait for completion of threads
   pthread_join(smoker1,NULL);
   pthread_join(smoker2,NULL);
   pthread_join(smoker3,NULL);
