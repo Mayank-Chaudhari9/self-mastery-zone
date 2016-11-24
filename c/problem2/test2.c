@@ -19,7 +19,9 @@ void* agent(void *arg)
 
 int main()
 {
-  pthread_t
+  int i;
+  for(i=0;i<SMOKERS;i++;)
+    pthread_create(&smoker[i],NULL,&smoker,NULL);
 
-  return 0;  
+  return 0;
 }
