@@ -1,0 +1,21 @@
+The Cigarette-smokers problem:
+
+PART I:
+Consider a system with three smoker processes and one agent process. Suppose a cigarette requires three ingredients, tobacco, paper and match. There are three chain smokers. Each of them has only one ingredient with infinite supply. There is an agent who has infinite supply of all three ingredients. To make a cigarette, the smoker has tobacco (resp., paper and match) must have the other two ingredients paper and match (resp., tobacco and match, and tobacco and paper). The agent and smokers share a table. The agent randomly generates two ingredients and notifies the smoker who needs these two ingredients. Once the ingredients are taken from the table, the agent supplies another two. On the other hand, each smoker waits for the agent's notification. Once it is notified, the smoker picks up the ingredients, makes a cigarette, smokes for a while, and goes back to the table waiting for his next ingredients.
+
+a) Write a program that simulates this system, with three smokers and the agent being simulated by threads.
+
+PART II:
+Consider there are n number of smokers and a single agent. In this case, there can be more than one smoker having the same ingredient at the same time. The priority among the smokers is set on a first come first serve basis. You are required to find out, among the n smokers, which smoker has the ingredient other than the two ingredients placed by the agent (There can be any number of smokers) and then check for the priority among them.
+
+b) Write a program to synchronize the agent and the n smokers
+
+PART III:
+In this part, the smokers have been classified into two categories, staff and student. The staff has more priority than the student because the student respect the staff and the priorities within the staff and the student is again on a first come first serve basis. Here we need to take care of student process being starved. I.e. you need to introduce some aging condition like the student can allow only 3 staffs to overtake him. Modify the program to
+
+c) Synchronize the above processes with only one agent.
+
+d) Synchronize the above processes with n agents.
+
+
+
