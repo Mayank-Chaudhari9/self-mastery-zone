@@ -75,25 +75,38 @@ void* smoker(void* arg)
   int resource=*(int*)arg;
   sem_wait(&sem_queue);
   insert(tid);
-  printf("Front is %lu\t\n", tid);
-  printf("Smoker %lu is smoking  and resource is \t%d\n",tid,resource);
+  //printf("Front is %lu\t\n", tid);
+  //printf("Smoker %lu is smoking  and resource is \t%d\n",tid,resource);
   sem_post(&sem_queue);
-  printf("Front is %lu resource %d\t\n", front->id,resource);
-  printf("Rear is %lu\t\n", rear->id);
+  //printf("Front is %lu resource %d\t\n", front->id,resource);
+  //printf("Rear is %lu\t\n", rear->id);
 
-  //while (1)
+  while (1)
+  {
+    int paper_match_value,paper_tobacco_value,tobacco_match_value;
+    sem_getvalue(&paper_match,&paper_match_value);
+    sem_getvalue(&tobacco_match,&tobacco_match_value);
+    sem_getvalue(&paper_tobacco,&paper_tobacco_value);
 
-    if(sem_wait(&paper_match))
-    {
-      printf("paper_match available\n");
-      sem_post(&distributer);
+      if(paper_match_value==1)
+      {
+        sem_wait(&paper_match);
+        printf("paper_match available\n");
+        sem_post(&distributer);
+      }
+      if(paper_tobacco_value==1)
+      {
+          sem_wait(&paper_tobacco);
+          printf("paper_tobacco available\n");
+          sem_post(&distributer);
+      }
+      if(tobacco_match_value==1)
+      {
+          sem_wait(&tobacco_match);
+          printf("tobacco_match available\n");
+          sem_post(&distributer);
+      }
     }
-
-    if(sem_wait(&paper_tobacco))
-        printf("paper_tobacco available\n");
-    if(sem_wait(&tobacco_match))
-        printf("tobacco_match available\n");
-
 
   //insert(tid);
 }
@@ -112,6 +125,7 @@ void* table(void *arg)
         sem_wait(&distributer);
         printf("Agent is distributing \n" );
         i=rand()%3;
+        printf("semaphore no %d\n",i );
         if(i==0)
           sem_post(&paper_match);
         if(i==1)

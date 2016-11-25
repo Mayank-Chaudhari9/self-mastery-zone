@@ -9,8 +9,9 @@ int main()
 {
   int val;
   sem_t test;
-  sem_init(&test,0,1);
-  sem_wait(&test);
+  sem_init(&test,0,0);
+  //sem_wait(&test);
+  sem_post(&test);
   sem_getvalue(&test,&val);
   printf(" down value is %d\n",val);
 
