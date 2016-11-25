@@ -6,7 +6,7 @@
 #define SMOKERS 5
 
 pthread_t smokers[SMOKERS],agent;
-sem_t distributer,paper_match,tobacco_match,paper_tobacco;
+sem_t distributer,paper_match,tobacco_match,paper_tobacco,sem_queue;
 
 //---------------------------------- Queue logic ------------------------//
 struct node
@@ -72,8 +72,30 @@ void queue_size()
 void* smoker(void* arg)
 {
   pthread_t tid=pthread_self();
-  printf("Smoker %lu is smoking \t\n",tid);
+  int resource=*(int*)arg;
+  sem_wait(&sem_queue);
   insert(tid);
+  printf("Front is %lu\t\n", tid);
+  printf("Smoker %lu is smoking  and resource is \t%d\n",tid,resource);
+  sem_post(&sem_queue);
+  printf("Front is %lu resource %d\t\n", front->id,resource);
+  printf("Rear is %lu\t\n", rear->id);
+
+  //while (1)
+
+    if(sem_wait(&paper_match))
+    {
+      printf("paper_match available\n");
+      sem_post(&distributer);
+    }
+
+    if(sem_wait(&paper_tobacco))
+        printf("paper_tobacco available\n");
+    if(sem_wait(&tobacco_match))
+        printf("tobacco_match available\n");
+
+
+  //insert(tid);
 }
 
 
@@ -103,21 +125,23 @@ void* table(void *arg)
 
 int main()
 {
-  int i=0,smoker_id[SMOKERS];
+  int i=0,smoker_id[SMOKERS],resource;
 
   sem_init(&distributer,0,1);
   sem_init(&paper_match,0,0);
   sem_init(&paper_tobacco,0,0);
   sem_init(&tobacco_match,0,0);
+  sem_init(&sem_queue,0,1);
 
 
   pthread_create(&agent,NULL,&table,NULL);
 
   for(i=0;i<SMOKERS;i++)
   {
+    resource=rand()%3;
     //smoker_id[i];
     //pthread_create(&smokers[i],NULL,&smoker,&smoker_id[i]);
-    pthread_create(&smokers[i],NULL,&smoker,NULL);
+    pthread_create(&smokers[i],NULL,&smoker,&resource);
   }
 
   for(i=0;i<SMOKERS;i++)
