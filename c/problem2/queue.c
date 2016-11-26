@@ -37,10 +37,11 @@ void delete()
    }
    else
    {
-      printf("removed element is %d\n",front->data);
+      printf("removed element is %lu\n",front->id);
       front=front->link;
       free(temp);
    }
+
 }
 void check()
 {

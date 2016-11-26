@@ -12,6 +12,7 @@ int main()
   sem_init(&test,0,0);
   //sem_wait(&test);
   sem_post(&test);
+  sem_post(&test);
   sem_getvalue(&test,&val);
   printf(" down value is %d\n",val);
 
