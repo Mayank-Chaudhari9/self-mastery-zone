@@ -33,6 +33,75 @@ def usage():
     sys.exit(0)
 
 #usage()
+
+def client_sender(buffer):
+    client = socket.socket(socket.AF_INET, SOCK_STREAM)
+
+    try:
+        # connect to our target host
+        client.connect((target,port))
+
+        if len(buffer):
+            client.send(buffer)
+
+        while True:
+            # wait for some response
+            recv_len=1
+            response=""
+
+            while  recv_len:
+                data     = client.recv(4096)
+                recv_len = len(data)
+                response+= data
+
+                if recv_len < 4096:
+                    break
+
+        print response,
+        #wait for more input
+        buffer = raw_input("")
+        buffer +="\n"
+        #send to client
+        client.send(bufer)
+
+    except:
+        print "[*] Exception ! Exiting."
+
+        # tear down the connection
+        client.close()
+
+
+def server_loop():
+    global target
+
+    #if no target is defined , listen on all interfacs
+
+    if not len(target):
+        target ="0.0.0.0"
+
+    server = socket.socket(socket.AF_INET,SOCK_STREAM)
+    server.bind((target,port))
+    server.listen(5)
+
+    while True:
+        client_socket, addr = socket.accept()
+
+        #spin threads to handle our new client_socket
+        client_thread = threading.Thread(target=client_handler,args=(client_socket))
+
+def run_command(command):
+    # trim the newlne
+    command = command.rstrip()
+
+    # run the command and get the output back
+    try :
+        output = subprocess.check_output(command,stderr=subprocess.STDOUT,shell=True)
+    except :
+        output = "Failled to execute command.\r\n"
+
+    #send the output backto the client_socket
+    return output
+
 def main():
     global listen
     global port
@@ -47,8 +116,45 @@ def main():
     # reading command line options
 
     try:
-        opts,args = getopt.getopt(sys.argv[1:],"hle:t:p:cu:",
-        ["help","listen","execute","target","port","command","upoad"])
+            opts,args = getopt.getopt(sys.argv[1:],"hle:t:p:cu:",
+            ["help","listen","execute","target","port","command","upoad"])
     except getopt.GetoptError as err:
-        print sttr(err)
-        usage()
+            print sttr(err)
+            usage()
+
+
+    for o,a in opts:
+        if o in ("-h","--help"):
+            usage()
+        elif o in ("-l","--listen"):
+            listen = True
+        elif o in ("-c","--commandshell"):
+            command = True
+        elif o in ("-e","--execute"):
+            execute = a
+        elif o in ("-u","--upload"):
+            upload_destination = a
+        elif o in ("-t","--target"):
+            target = a
+        elif o in ("-p","--port"):
+            port = int(a)
+        else:
+            assert False, "Unhandelled option"
+
+        #are u going to listen or just send data
+        if not listen and len(target) and port > 0:
+            # read in the buffer from the commandline
+            # this will bock , so send CTRL-D if not sending input
+            #to stdin
+
+            buffer  = sys.stdin.read()
+
+            # send data off
+            client_sender(bufer)
+
+        # we are rgoing to listen and potentially  upload things
+        #execute comands, and drop a shell back depending on our line options
+
+        if listen:
+            server_loop()
+main();
