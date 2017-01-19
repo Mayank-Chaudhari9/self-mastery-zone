@@ -36,33 +36,33 @@ def usage():
 
 def client_sender(buffer):
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+    print port,target
     try:
         # connect to our target host
         client.connect((target,port))
-
-        if len(buffer):
-            client.send(buffer)
-
-        while True:
+        print "connected"
+        #if len(buffer):
+            #client.send(buffer)
+        #print "working fine till here"
+        #while True:
             # wait for some response
-            recv_len=1
-            response=""
+            #recv_len=1
+            #response=""
 
-            while  recv_len:
-                data     = client.recv(4096)
-                recv_len = len(data)
-                response+= data
+            #while  recv_len:
+                #data     = client.recv(4096)
+                #recv_len = len(data)
+                #response+= data
 
-                if recv_len < 4096:
-                    break
+                #if recv_len < 4096:
+                    #break
 
-        print response,
+        #print response,
         #wait for more input
-        buffer = raw_input("")
-        buffer +="\n"
+        #buffer = raw_input("")
+        #buffer +="\n"
         #send to client
-        client.send(bufer)
+        #client.send(bufer)
 
     except:
         print "[*] Exception ! Exiting."
@@ -84,7 +84,7 @@ def server_loop():
     server.listen(5)
 
     while True:
-        client_socket, addr = socket.accept()
+        client_socket, addr = server.accept()
 
         #spin threads to handle our new client_socket
         client_thread = threading.Thread(target=client_handler,args=(client_socket))
