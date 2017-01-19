@@ -35,7 +35,7 @@ def usage():
 #usage()
 
 def client_sender(buffer):
-    client = socket.socket(socket.AF_INET, SOCK_STREAM)
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
         # connect to our target host
@@ -79,7 +79,7 @@ def server_loop():
     if not len(target):
         target ="0.0.0.0"
 
-    server = socket.socket(socket.AF_INET,SOCK_STREAM)
+    server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     server.bind((target,port))
     server.listen(5)
 
@@ -101,6 +101,58 @@ def run_command(command):
 
     #send the output backto the client_socket
     return output
+
+def client_handler(client_socket):
+    global upload
+    global execute
+    global command
+
+    #check for upload
+    if len(upload_destination):
+        # read all bytes and write to deatination
+        file_buffer = ""
+
+        # keep reading data until none is available
+        while  True:
+            data = client_socket.recv(1024)
+
+            if not data :
+                break
+            else :
+                file_buffer+=data
+
+        # now take the buffer and write them output
+        try:
+            file_descriptor =open(upload_destination,"wb")
+            file_descriptor.write(file_buffer)
+            file_descriptor.close()
+
+            #acknowledge we wrote the file output
+            client_socket.send("Successfully saved to %s\r\n"% upload_destination)
+        except:
+            client_socket.send("Failled to save file to %s\t\n"% upload_destination)
+
+    #check for command execution
+    if len(execute):
+        # run the command
+        output = run_command(execute)
+        client_socket.send(output)
+    #if command shell is requested
+
+    if command:
+        while True:
+            # show a simple prompt
+            client_socket.send("Rcat:#> ")
+            #receive data until a linefeed (enter key)
+            cmd_bufer=""
+            while "\n" not in cmd_bufer:
+                cmd_bufer+=client_socket.recv(1024)
+
+            #send back the command output
+
+            response = run_command(cmd_bufer)
+            #send back the response
+            client_socket.send(response)
 
 def main():
     global listen
@@ -150,7 +202,7 @@ def main():
             buffer  = sys.stdin.read()
 
             # send data off
-            client_sender(bufer)
+            client_sender(buffer)
 
         # we are rgoing to listen and potentially  upload things
         #execute comands, and drop a shell back depending on our line options
