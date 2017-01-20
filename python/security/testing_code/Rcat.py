@@ -35,6 +35,9 @@ def usage():
 #usage()
 
 def client_sender(buffer):
+    global target
+    global port
+
     client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     print port,target
     #try:
