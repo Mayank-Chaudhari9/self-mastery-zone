@@ -37,10 +37,10 @@ def usage():
 def client_sender(buffer):
     client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
     print port,target
-    try:
+    #try:
         # connect to our target host
-        client.connect((target,port))
-        print "connected"
+    client.connect((target,port))
+    print "connected"
         #if len(buffer):
             #client.send(buffer)
         #print "working fine till here"
@@ -64,8 +64,8 @@ def client_sender(buffer):
         #send to client
         #client.send(bufer)
 
-    except:
-        print "[*] Exception ! Exiting."
+    #except:
+    print "[*] Exception ! Exiting."
 
         # tear down the connection
     client.close()
@@ -88,7 +88,6 @@ def server_loop():
 
         #spin threads to handle our new client_socket
         client_thread = threading.Thread(target=client_handler,args=(client_socket))
-        client_thread.start()
 
 def run_command(command):
     # trim the newlne
@@ -150,7 +149,6 @@ def client_handler(client_socket):
                 cmd_bufer+=client_socket.recv(1024)
 
             #send back the command output
-             print "inside client_handler"
 
             response = run_command(cmd_bufer)
             #send back the response
