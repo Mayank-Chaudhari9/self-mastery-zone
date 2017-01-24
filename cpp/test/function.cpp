@@ -2,15 +2,18 @@
 
 using namespace std;
 
-void test();
+void test(int a);
 
 int main()
 {
-    test();
+    int a ;
+    cout<< "Enter a value to print \n";
+    cin>>a;
+    test(a);
     return 0;
 }
 
-void test()
+void test(int a )
 {
-    cout<<"This is a function function"<<endl;
+    cout<<"This is a function function that print a input value "<<a<<endl;
 }
