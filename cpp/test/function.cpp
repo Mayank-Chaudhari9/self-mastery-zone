@@ -2,6 +2,8 @@
 
 using namespace std;
 
+void test();
+
 int main()
 {
     test();
