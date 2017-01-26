@@ -37,5 +37,8 @@ int main()
     Constructor_test con_t("Mayank"); // using constructor to initialize value
 
     cout << con_t.getName() << endl;
+
+    Constructor_test con_t2(" Chaudhari");
+    cout << con_t2.getName() <<endl;
     return 0;
 }
