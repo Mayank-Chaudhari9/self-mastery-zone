@@ -9,10 +9,10 @@ class friend1
         friend1(){ int myvar = 0;}
     private:
         int myvar;
-
+    //prototype of friend function
     friend void myfriend (friend1 &f);
 };
-
+//friend funvtion definition
 void myfriend(friend1 &f)
 {
     f.myvar = 99;
