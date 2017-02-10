@@ -8,7 +8,7 @@ class op1
         op1();
         int num;
         op1(int);
-
+    // prtotype for + operator overloading.
         op1 operator+(op1);
 
     protected:

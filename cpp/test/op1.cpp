@@ -14,6 +14,7 @@ op1::op1(int a )
 }
 
 // return a new object of type op1
+// new definition for overloaded operator
 op1 op1::operator+(op1 op)
 {
     op1 newop;
