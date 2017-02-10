@@ -2,11 +2,11 @@
 #define DAUGHTER_H
 
 
-class daughter
+class daughter: public mother
 {
     public:
         daughter();
-        void sayName();
+        //void sayName();
 
 };
 

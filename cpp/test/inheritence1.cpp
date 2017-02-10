@@ -1,14 +1,14 @@
 #include <iostream>
-#include "daughter.h"
 #include "mother.h"
+#include "daughter.h"
 
 using namespace std;
 
 int main()
 
 {
-    mother m;
-    m.sayName();
+    //mother m;
+    //m.sayName();
 
     daughter d;
     d.sayName();

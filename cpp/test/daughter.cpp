@@ -1,3 +1,5 @@
+
+#include "mother.h"
 #include "daughter.h"
 
 #include <iostream>
@@ -10,7 +12,8 @@ daughter::daughter()
     //ctor
 }
 
-void daughter::sayName()
+/*void daughter::sayName()
 {
     cout << " I am sister class " <<endl;
 }
+*/
