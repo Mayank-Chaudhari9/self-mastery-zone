@@ -11,5 +11,6 @@ int main()
     protected2 p2;
     p2.doSomething();
 
+
     return 0;
 }
