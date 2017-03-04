@@ -30,3 +30,5 @@ int main()
 //bee s xy 
 
 // works with c++11
+//g++ lexiographic_vector_sorting.cpp -std=c++0x -std=gnu++0x
+//g++ lexiographic_vector_sorting.cpp -std=c++0x -std=gnu++0x
