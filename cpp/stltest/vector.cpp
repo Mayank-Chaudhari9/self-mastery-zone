@@ -51,6 +51,18 @@ int main()
 
 	*/
 
+	//copying a C style array to vector
+	double p[]={1,2,3,4,5};
+	std::vector<double> d_v(p,p+5);// Here we use another constructor provided by vector. It takes two parameters: a pointer to the first element of a C-style array and a pointer to one past the last element of that array
+
+	/* 
+		    std::vector<int> v(5);
+    		int *pi = &v[3];
+    		v.push_back(999); // <-- may trigger a reallocation
+    		*pi = 333;        // <-- probably an error, pi isn't valid any more due to erelocation of memory
+    /*
+
+
 
 	return 0;
 }
