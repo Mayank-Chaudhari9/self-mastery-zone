@@ -17,7 +17,25 @@ int main(int argc, char const *argv[])
 	sv.pop_back(); //removing last element from vector
 	//print last element after removing
 	std::cout<<sv.back()<<std::endl;
-	
+
 	std::cout<<sv.front()<<std::endl;
+    // few equivalent vector operations
+    /*
+    	std::vector<int> v;
+		v.push_back(999);
+		// fill up the vector
+		//...
+		// following statements are equivalent:
+		int i = v.front();
+		int i = v[0];
+		int i = v.at(0);
+		int i = *(v.begin());
+		// following statements are equivalent:
+		int j = v.back();
+		int j = v[v.size()-1];
+		int j = v.at(v.size()-1);
+		int j = *(v.end()-1)
+	*/
+
 	return 0;
 }
