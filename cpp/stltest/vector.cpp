@@ -25,7 +25,7 @@ int main()
 
 	char_v.push_back('M');
 	std::cout<<int_v.at(6) << std::endl; // correct
-	std::cout<<char_v.at(0); // correct
+	std::cout<<char_v.at(0)<< std::endl; // correct
 	//std::cout<<char_v.at(2); // not-correct -> although space is reserved for 10 but memory is not initialized for them -> out_of_range error
 	/*
 		    std::vector<int> array;   // create an empty vector
@@ -60,7 +60,7 @@ int main()
     		int *pi = &v[3];
     		v.push_back(999); // <-- may trigger a reallocation
     		*pi = 333;        // <-- probably an error, pi isn't valid any more due to erelocation of memory
-    /*
+    */
 
 
 
