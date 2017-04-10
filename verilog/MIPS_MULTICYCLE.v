@@ -238,15 +238,11 @@ endmodule
 
 // Instruction register code goes here
 
-module InstructionRegister(Instruction, JumpAddr, Immediate, OpCode, RS, RT, RD, SHAMT, FUNCT, MemOut, IRWrite, Clock);
+module InstructionRegister(Instruction, MemOut, IRWrite, Clock);
     output [15:0] Instruction;
-    output [12:0] JumpAddr;
-    output [6:0] Immediate;
-    output [2:0] OpCode;
-	output [3:0] FUNCT;
-    output [2:0] RS, RT, RD, SHAMT;
-    input  [15:0] MemOut;
-    input IRWrite, Clock;
+	 
+	 input [15:0] MemOut;
+	 input IRWrite, Clock;
     
     reg [15:0] Instruction;
     
@@ -256,15 +252,787 @@ module InstructionRegister(Instruction, JumpAddr, Immediate, OpCode, RS, RT, RD,
         end
     end
     
-    assign OpCode = Instruction[2:0];
-    assign RS = Instruction[5:3];
-    assign RT = Instruction[8:6];
-    assign RD = Instruction[15:13];
-    assign SHAMT = Instruction[12:9];
-    assign FUNCT = Instruction[12:9];
-    assign Immediate = Instruction[15:9];
-    assign JumpAddr = Instruction[15:3];
 endmodule
 
 // Instruction Register code ends here
 //----------------------------------------------------------------------------
+
+// Alu code starts here
+
+module Alu (AluIn1, AluIn2, AluOp, CIn,  AluOut1, AluOut2, COut, BOut);
+	
+	input [15:0] AluIn1, AluIn2;
+	input [3:0]	 AluOp;
+	input CIn;
+	
+	output reg [15:0] AluOut1, AluOut2;
+	output reg COut, BOut;
+	
+	always @ (AluOp)
+		begin
+			case(AluOp)
+				4'd0: {COut, AluOut1} 	 = AluIn1 + AluIn2;		// add
+				
+				4'd1: AluOut1 				 = AluIn1 & AluIn2;		// and
+				
+				4'd2: AluOut1 				 = ~(AluIn1);				// not
+	
+				4'd3: {AluOut2, AluOut1} = AluIn1 * AluIn2; 		// mul
+				
+				4'd4: {COut, AluOut1} 	 = AluIn1 - AluIn2;		// sub
+				
+				4'd5: AluOut1				 = AluIn1 << AluIn2;		// sll  (shift left logical)
+				
+				4'd6: AluOut1				 = AluIn1 <<< AluIn2;	// sla  (shift left arithmetic)
+				
+				4'd7: AluOut1				 = AluIn1 >> AluIn2;		// srl  (shift right logical)
+				
+				4'd8: AluOut1				 = AluIn1 >>> AluIn2;   // sra  (shift right arithmetic)
+				
+				4'd9: // set less than (slt/slti)
+					begin
+						if(AluIn1 < AluIn2)
+							begin 
+								AluOut1 = 15'd1;
+							end
+					end
+					
+				4'd10: // branch equal (beq)
+					begin
+						if (AluIn1 == AluIn2)
+							BOut = 1'b1;
+						else 
+							BOut = 1'b0;
+					end
+					
+				4'd11: AluOut1 				= 15'd0; 			  // NOP
+					
+				
+			endcase
+		end
+	
+endmodule
+
+// alucode end here 
+
+// Alu control start here 
+
+module AluCtrl(Opcode, Operation, AluOp, SType);
+	
+	output reg [3:0] AluOp;
+	
+	input [2:0] Opcode;
+	input [3:0] Operation;
+	input [2:0] SType; 
+	
+	always @ (Opcode)
+	  begin
+		case(Opcode)
+			3'd0:
+				begin 
+					case(Operation)
+						4'd0: AluOp = 4'd0; //add
+						
+						4'd1  : AluOp = 4'd1; //and 
+						
+						4'd2  : AluOp = 4'd2; //not
+						
+						4'd3  : AluOp = 4'd3; //mul
+						
+						4'd4  : AluOp = 4'd4; //sub	
+
+						4'd11 : AluOp = 4'd11; //nop
+					endcase
+				end
+					
+			3'd1:
+				begin
+					case(SType)
+						2'd0 : AluOp = 4'd5; //sll
+						
+						2'd1 : AluOp = 4'd7; //srl
+						
+						2'd2 : AluOp = 4'd8; //sra
+					
+					endcase
+				end
+			
+			3'd2 : //slti
+				begin
+					case(Operation)
+						4'd9  : AluOp = 4'd9;   //slt
+						4'd11 : AluOp = 4'd11; //nop
+					endcase
+				end
+				
+			3'd3 : //addi
+				begin
+					case(Operation)
+						4'd0  : AluOp = 4'd0;   //add
+						4'd11 : AluOp = 4'd11; //nop
+					endcase
+				end
+				
+			3'd4 : //ld -> add
+				begin
+					case(Operation)
+						4'd0  : AluOp = 4'd0;  //add
+						4'd11 : AluOp = 4'd11;//nop
+					endcase
+				end
+				
+			3'd5 : // sw -> add
+				begin
+					case(Operation)
+						4'd0  : AluOp = 4'd0;  //add
+						4'd11 : AluOp = 4'd11;//nop
+					endcase
+				end
+				
+			3'd6 :  // beq
+				begin
+					case(Operation)
+						4'd10 : AluOp = 4'd10;//
+						//4'd11 : AluOp = 4'd11;//nop
+					endcase
+				end
+				
+			3'd7 :   // NOP
+				begin
+					case(Operation)
+						4'd11 : AluOp = 4'd11;//nop
+					endcase
+				end
+				
+				
+		endcase
+	end 
+endmodule
+// Alu control end here
+
+// ALU related code end here
+//----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+
+//Control circuit goes here
+
+module Control_Unit(input [2:0] Opcode, input [3:0] Funcode, output reg PcWr, output reg IoD, output reg MemWR, output reg MemRD,
+						  output reg IRWrite, output reg [1:0] RegDestSel, output reg [1:0] WriteDataSel, output reg RegWr, output reg [2:0] AluSrcBSel,
+						  output reg [1:0] AluSrcASel, output reg LoWr, output reg HiWr, output reg EPCWr, output reg CauseWr, output reg IntCause,
+						  output reg PCWrCond, output reg [1:0] PCSrc, output reg [3:0] Operation, input Reset, input Clock);
+						  
+						  reg [4:0] State, NextState;
+						  
+		always @(negedge  Clock or Reset)
+			begin
+				if(Reset)
+					begin 
+						PcWr		   = 0;
+						IoD		   = 0; 
+						MemWR		   = 0;
+						MemRD		   = 0;
+						IRWrite	   = 0;
+						RegDestSel  = 2'b00;
+						WriteDataSel= 2'b00;
+						RegWr			= 0;
+						AluSrcASel	= 2'b00;
+						AluSrcBSel	= 3'b000;
+						LoWr			= 0;
+						HiWr			= 0;
+						EPCWr			= 0;
+						CauseWr		= 0;
+						IntCause		= 0;
+						PCWrCond		= 0;
+						PCSrc			= 2'b00;
+						Operation	= 4'd11;
+						NextState	= 5'd0;
+					end
+				 else
+						State			= NextState; 
+			  end
+			  
+		always @(State)
+			begin
+				case(State)
+					5'd0:  // <<-- instruction fetch
+						begin 
+							PcWr		   = 1;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 1;
+							IRWrite	   = 1;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b01;
+							AluSrcBSel	= 3'b111;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd0;
+							NextState	= 5'd1;
+						end
+					
+					5'd1:  // <<--- Instruction decode
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b01;
+							AluSrcBSel	= 3'b100;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation 	=4'd0; //add (aluout=pc+ offset <<1)
+							//-----------------------------
+							// need to decide states on the basis of operations
+							case(Opcode)
+								3'd0:
+									begin 
+										case (Funcode)
+											4'd0: NextState = 5'd2;  // <-- Add  instruction
+											4'd1: NextState = 5'd4;  // <-- And  instruction
+											4'd2: NextState = 5'd5;  // <-- Not  instruction
+											4'd3: NextState = 5'd6;  // <-- Jalr instruction
+											4'd4: NextState = 5'd8;  // <-- madd instruction
+											4'd5: NextState = 5'd11; // <-- msub instruction
+										endcase
+									end
+								//3'd1: NextState = 5'd14; // <-- shft instruction
+								3'd2: NextState = 5'd14; // <-- sltiu instruction
+								3'd3: NextState = 5'd16; // <-- addi instruction
+								3'd4: NextState = 5'd17; // <-- lb instruction
+								3'd5: NextState = 5'd20; // <-- lw instruction
+								3'd6: NextState = 5'd22; // <-- beq instruction
+								3'd7: NextState = 5'd23; // <-- jal instruction
+								
+							endcase
+							//--------------------------------
+						end
+								
+					// operation based States start here
+					
+					5'd2:  // <<-- Add exec 
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b00;
+							AluSrcBSel	= 3'b110;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd0; //add
+							NextState	= 5'd3; //to writeback
+						end
+						
+					5'd3:  // <<-- Common Writeback for Add, And, Not
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 1;
+							AluSrcASel	= 2'b00;
+							AluSrcBSel	= 3'b110;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd11; //NOP
+							NextState	= 5'd0;   // writeback completion go to state o; 
+						end
+					
+					5'd4:  // <<-- And exec 
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b00;
+							AluSrcBSel	= 3'b110;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd1; //and
+							NextState	= 5'd3; // to writeback
+						end
+						
+					5'd5:  // <<-- Not exec 
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b00;
+							AluSrcBSel	= 3'b110;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd2; // not
+							NextState	= 5'd3; // to writeback
+						end
+					
+					5'd6:  // <<-- Jalr WB1 
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b01;
+							RegWr			= 1;
+							AluSrcASel	= 2'b00;
+							AluSrcBSel	= 3'b110;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd11; // nop
+							NextState	= 5'd7; // to writeback 2 of jalr
+						end
+					
+					5'd7:  // <<-- Jalr WB2 
+						begin 
+							PcWr		   = 1;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b00;
+							AluSrcBSel	= 3'b110;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b00;
+							Operation	= 4'd11; // nop
+							NextState	= 5'd0; // to next instruction -> 0
+						end
+						
+					5'd8:  // <<-- madd exec1 
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b00;
+							AluSrcBSel	= 3'b110;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd3; // mul
+							NextState	= 5'd9; // to madd exec2
+						end
+						
+					5'd9:  // <<-- madd exec2 
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b11;
+							AluSrcBSel	= 3'b010;
+							LoWr			= 1;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd0; //add
+							NextState	= 5'd10; //to madd exec3
+						end
+						
+					5'd10:  // <<-- madd exec3
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b10;
+							AluSrcBSel	= 3'b000;
+							LoWr			= 0;
+							HiWr			= 1;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd0; //add
+							NextState	= 5'd0; //to next inst -> 0
+						end
+
+					5'd11:  // <<-- msub exec1 
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b00;
+							AluSrcBSel	= 3'b110;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd3; // mul
+							NextState	= 5'd12; // to msub exec2
+						end
+						
+					5'd12:  // <<-- madd exec2 
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b11;
+							AluSrcBSel	= 3'b010;
+							LoWr			= 1;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd4; // sub
+							NextState	= 5'd13; //to msub exec3
+						end
+						
+					5'd13:  // <<-- msub exec3
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b10;
+							AluSrcBSel	= 3'b000;
+							LoWr			= 0;
+							HiWr			= 1;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd4; //sub
+							NextState	= 5'd0; //to next inst -> 0
+						end
+						
+					5'd14:  // <<-- sltiu exec 
+						begin 
+							PcWr		   = 0;
+							IoD		   = 0; 
+							MemWR		   = 0;
+							MemRD		   = 0;
+							IRWrite	   = 0;
+							RegDestSel  = 2'b00;
+							WriteDataSel= 2'b00;
+							RegWr			= 0;
+							AluSrcASel	= 2'b00;
+							AluSrcBSel	= 3'b001;
+							LoWr			= 0;
+							HiWr			= 0;
+							EPCWr			= 0;
+							CauseWr		= 0;
+							IntCause		= 0;
+							PCWrCond		= 0;
+							PCSrc			= 2'b01;
+							Operation	= 4'd9; // slt
+							NextState	= 5'd15; // to writeback ->15
+						end
+					
+					5'd15:  // <<-- common WriteBack for sltiu, addi
+							begin 
+								PcWr		   = 0;
+								IoD		   = 0; 
+								MemWR		   = 0;
+								MemRD		   = 0;
+								IRWrite	   = 0;
+								RegDestSel  = 2'b10;
+								WriteDataSel= 2'b00;
+								RegWr			= 1;
+								AluSrcASel	= 2'b00;
+								AluSrcBSel	= 3'b110;
+								LoWr			= 0;
+								HiWr			= 0;
+								EPCWr			= 0;
+								CauseWr		= 0;
+								IntCause		= 0;
+								PCWrCond		= 0;
+								PCSrc			= 2'b01;
+								Operation	= 4'd11; // nop
+								NextState	= 5'd0; // to next inst ->0
+							end
+
+					5'd16:  // <<-- Addi exec 
+							begin 
+								PcWr		   = 0;
+								IoD		   = 0; 
+								MemWR		   = 0;
+								MemRD		   = 0;
+								IRWrite	   = 0;
+								RegDestSel  = 2'b00;
+								WriteDataSel= 2'b00;
+								RegWr			= 0;
+								AluSrcASel	= 2'b00;
+								AluSrcBSel	= 3'b101;
+								LoWr			= 0;
+								HiWr			= 0;
+								EPCWr			= 0;
+								CauseWr		= 0;
+								IntCause		= 0;
+								PCWrCond		= 0;
+								PCSrc			= 2'b01;
+								Operation	= 4'd0; //add
+								NextState	= 5'd15; //to writeback ->15
+							end
+
+					5'd17:  // <<-- lb exec (address calculation)
+							begin 
+								PcWr		   = 0;
+								IoD		   = 0; 
+								MemWR		   = 0;
+								MemRD		   = 0;
+								IRWrite	   = 0;
+								RegDestSel  = 2'b00;
+								WriteDataSel= 2'b00;
+								RegWr			= 0;
+								AluSrcASel	= 2'b00;
+								AluSrcBSel	= 3'b101;
+								LoWr			= 0;
+								HiWr			= 0;
+								EPCWr			= 0;
+								CauseWr		= 0;
+								IntCause		= 0;
+								PCWrCond		= 0;
+								PCSrc			= 2'b01;
+								Operation	= 4'd0; //add ---->for mem[offset+rs]
+								NextState	= 5'd18; //to mem ->18
+							end
+							
+					5'd18:  // <<-- lb MEM
+							begin 
+								PcWr		   = 0;
+								IoD		   = 1; 
+								MemWR		   = 0;
+								MemRD		   = 1; // mem read
+								IRWrite	   = 0;
+								RegDestSel  = 2'b00;
+								WriteDataSel= 2'b00;
+								RegWr			= 0;
+								AluSrcASel	= 2'b00;
+								AluSrcBSel	= 3'b101;
+								LoWr			= 0;
+								HiWr			= 0;
+								EPCWr			= 0;
+								CauseWr		= 0;
+								IntCause		= 0;
+								PCWrCond		= 0;
+								PCSrc			= 2'b01;
+								Operation	= 4'd11; //nop
+								NextState	= 5'd19; //to writeback ->19
+							end
+		
+					5'd19:  // <<-- lb WB
+							begin 
+								PcWr		   = 0;
+								IoD		   = 0; 
+								MemWR		   = 0;
+								MemRD		   = 0;
+								IRWrite	   = 0;
+								RegDestSel  = 2'b00;
+								WriteDataSel= 2'b10; // data from mdr
+								RegWr			= 0;
+								AluSrcASel	= 2'b00;
+								AluSrcBSel	= 3'b101;
+								LoWr			= 0;
+								HiWr			= 0;
+								EPCWr			= 0;
+								CauseWr		= 0;
+								IntCause		= 0;
+								PCWrCond		= 0;
+								PCSrc			= 2'b01;
+								Operation	= 4'd11; //nop
+								NextState	= 5'd0; //to next inst ->0
+							end
+					
+					5'd20:  // <<-- sw exec (address calculation)
+							begin 
+								PcWr		   = 0;
+								IoD		   = 0; 
+								MemWR		   = 0;
+								MemRD		   = 0;
+								IRWrite	   = 0;
+								RegDestSel  = 2'b00;
+								WriteDataSel= 2'b00;
+								RegWr			= 0;
+								AluSrcASel	= 2'b00;
+								AluSrcBSel	= 3'b101;
+								LoWr			= 0;
+								HiWr			= 0;
+								EPCWr			= 0;
+								CauseWr		= 0;
+								IntCause		= 0;
+								PCWrCond		= 0;
+								PCSrc			= 2'b01;
+								Operation	= 4'd0; //add ---->for mem[offset+rs]
+								NextState	= 5'd21; //to writeback ->21
+							end
+					
+					5'd21:  // <<-- lb WB
+							begin 
+								PcWr		   = 0;
+								IoD		   = 1; 
+								MemWR		   = 0;
+								MemRD		   = 0; // mem read
+								IRWrite	   = 1; // mem write
+								RegDestSel  = 2'b00;
+								WriteDataSel= 2'b00;
+								RegWr			= 0;
+								AluSrcASel	= 2'b00;
+								AluSrcBSel	= 3'b101;
+								LoWr			= 0;
+								HiWr			= 0;
+								EPCWr			= 0;
+								CauseWr		= 0;
+								IntCause		= 0;
+								PCWrCond		= 0;
+								PCSrc			= 2'b01;
+								Operation	= 4'd11; //nop
+								NextState	= 5'd0; //to next inst ->0
+							end
+					
+					5'd22:  // <<-- beq exec
+							begin 
+								PcWr		   = 0;
+								IoD		   = 0; 
+								MemWR		   = 0;
+								MemRD		   = 0; 
+								IRWrite	   = 0; 
+								RegDestSel  = 2'b00;
+								WriteDataSel= 2'b00;
+								RegWr			= 0;
+								AluSrcASel	= 2'b00;
+								AluSrcBSel	= 3'b100; //offset <<1
+								LoWr			= 0;
+								HiWr			= 0;
+								EPCWr			= 0;
+								CauseWr		= 0;
+								IntCause		= 0;
+								PCWrCond		= 0;
+								PCSrc			= 2'b01;
+								Operation	= 4'd10; //beq
+								NextState	= 5'd0; //to next inst ->0
+							end
+					
+					5'd23:  // <<-- jal exec
+							begin 
+								PcWr		   = 0;
+								IoD		   = 0; 
+								MemWR		   = 0;
+								MemRD		   = 0; 
+								IRWrite	   = 0; 
+								RegDestSel  = 2'b00;
+								WriteDataSel= 2'b00;
+								RegWr			= 0;
+								AluSrcASel	= 2'b00;
+								AluSrcBSel	= 3'b100; //offset <<1
+								LoWr			= 0;
+								HiWr			= 0;
+								EPCWr			= 0;
+								CauseWr		= 0;
+								IntCause		= 0;
+								PCWrCond		= 0;
+								PCSrc			= 2'b01;
+								Operation	= 4'd10; 
+								NextState	= 5'd0; //to next inst ->0
+							end
+					
+					
+					
+				endcase
+			end
+endmodule
