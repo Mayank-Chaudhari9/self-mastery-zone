@@ -32,7 +32,9 @@
 			<Add option="-Wall" />
 			<Add option="-fexceptions" />
 		</Compiler>
-		<Unit filename="main.cpp" />
+		<Unit filename="Untitled1.ads" />
+		<Unit filename="tree0.cpp" />
+		<Unit filename="xor.cpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
