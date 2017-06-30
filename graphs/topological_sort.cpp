@@ -1,6 +1,6 @@
 # include <bits/stdc++.h>
 
-usuing namespace std;
+using namespace std;
 
 
 
@@ -8,7 +8,7 @@ class Graph
 {
 	int V;
 	list<int> *adj;
-	void toposortUtil(int v, int visited[], stack<int> &stack);
+	void toposortUtil(int v, bool visited[], stack<int> &stack);
 public:
 	Graph(int v);
 	void addedge(int u, int v);
@@ -31,7 +31,7 @@ void Graph :: addedge(int u, int v)
 }
 
 
-void Graph :: toposortUtil(int v, int visited[], stack<int>Stack)
+void Graph::toposortUtil(int v, bool visited[], stack<int> &Stack)
 {
 
 	visited[v] = true;
@@ -41,15 +41,15 @@ void Graph :: toposortUtil(int v, int visited[], stack<int>Stack)
 	for(it=adj[v].begin(); it!= adj[v].end(); ++it)
 	{
 		if(!visited[*it])
-			toposortUtil(*it, visited, Stack)
+			toposortUtil(*it, visited, Stack);
 	}
 
 	Stack.push(v);
 }
 
-void Graph:: toposort()
+void Graph::toposort()
 {
-	bool *visited = new list<bool>[V];
+	bool *visited = new bool[V];
 
 	for(int i=0;i<V;i++)
 		visited[i] = false;
@@ -59,8 +59,8 @@ void Graph:: toposort()
 	list<int> :: iterator i;
 	for(int i=0;i<V; i++)
 	{
-		if(!visited[*i])
-			toposortUtil( i, visited, s)
+		if(!visited[i])
+			toposortUtil( i, visited, Stack);
 	}
 
 	while(Stack.empty() == false)
