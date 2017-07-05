@@ -16,5 +16,14 @@ int main(int argc, char const *argv[])
 		cout << buf << " ";
 	}
 
+	cout <<endl;
+
+	string output;
+	string s2= " comma, seperated, values";
+
+	istringstream ss2(s2);
+	while(getline(ss2, output,','))
+		cout << output << " " <<  endl;
+
 	return 0;
 }
