@@ -54,6 +54,7 @@ int main(int argc, char const *argv[])
 	root->left = newNode(10);
     root->right = newNode(30);
     root->right->left = newNode(25);
+    root->left->left = newNode(15);
     root->right->right = newNode(40);
 
 
