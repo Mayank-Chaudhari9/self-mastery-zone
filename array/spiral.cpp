@@ -10,29 +10,42 @@ void spiralPrint(int row, int col, int a[R][C])
 {
 
 	int i=0;
-	int j=0;
+	//int j=0;
 	
-	int l=0;
+	//int l=0;
 	int k=0;
 
 	int itr;
-	while(i<row && l<col)
+	while(i<row && k<col)
 	{
 
-		for(itr =i ;itr <col ;itr++)
+		for(itr =k ;itr <col ;++itr)
 			cout << a[i][itr] <<" ";
 
 		//cout << "count" <<endl;
 		i++;
 
-		for(itr =i; itr < row;itr++)
-			cout << a[itr][col-1];
+		for(itr =i; itr < row;++itr)
+			cout << a[itr][col-1]<< " ";
 
 		col--;
 
-		for (itr = col-1; itr >= k; itr++)
+		if(i< row)
+			{
+				for (itr = col-1; itr >= k; --itr)
+				{
+					cout << a[row-1][itr] << " ";
+				}
+				row-- ;
+			}
+
+		if(k < col)
 		{
-			cout << a[row-1][itr] << " ";
+			for (itr = row-1; itr >=k; --itr)
+			{
+				cout << a[itr][k]<<"  ";
+			}
+			k++;
 		}
 
 	}
