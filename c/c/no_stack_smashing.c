@@ -1,5 +1,9 @@
 #include <stdio.h>
 
+// for no stack smashing compile with 
+// gcc -zexecstack -fno-stack-protector no_stack_smashing.c 
+
+
 int main(int argc, char const *argv[])
 {
 	int a[1];
@@ -12,4 +16,5 @@ int main(int argc, char const *argv[])
 	printf("%d\n",a[2] );
 
 	return 0;
+
 }
