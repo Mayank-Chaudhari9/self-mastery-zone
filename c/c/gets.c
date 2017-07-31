@@ -7,5 +7,14 @@ int main(int argc, char const *argv[])
 	//gets(a);
 	fgets(a,10,stdin);
 	printf("%s\n",a );
+
+
+	// carriage return test;
+
+	printf("FOOO\bBAAR");
+	printf("\n");
+	printf("MAYANK \rCHAUDHARI\n");
+
+
 	return 0;
 }
