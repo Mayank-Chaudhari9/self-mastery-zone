@@ -1,0 +1,17 @@
+1- > Priority inversion
+	-> in priority sceduling due to voilation of the prioroty order.
+	-> solution -> priority inheritance.
+
+2-> spin lock 
+	-> problem in RTOS due to critical section
+	-> solution priority inversion actually same confirm it.
+
+
+3-> Watchdog timers
+	-> used in embeded systems. A piece of hardware that can be used to automatically detect software anomalies and reset the processor if any occur. Generally speaking, a watchdog timer is based on a counter that counts down from some initial value to zero.  The embedded software selects the counter's initial value and periodically restarts it. If the counter ever reaches zero before the software restarts it, the software is presumed to be malfunctioning and the processor's reset signal is asserted. The processor will be restarted. The process of restarting the watchdog timer's counter is sometimes called "kicking the dog." 
+
+
+	--> differences between h/w and s/w watchdogs
+		A hardware watchdog is hardware. Software watchdog is software. For a hardware watchdog, there is hardware that if it is not kicked often enough will assume the software has hung and will reset the system usually or whatever the design dictates. The hardware is assumed to be more reliable than the software. For a software watchdog, one software task/thread/whatever is assumed to be more reliable than another, if the questionable code fails to kick the reliable code then the reliable code kills the questionable code (or whatever the design dictates). There is a problem if the questionable code fails due to hardware which could take down all of the code including the software watchdog. So a software watchdog is only useful if you have the watchdog running in such a way that it is more reliable than the task in question, for example it may be there to prevent a task from wandering out of its memory space and getting a protection fault (which you could have just watched for in a fault handler rather than setup a watchdog, but anyway)...
+
+
