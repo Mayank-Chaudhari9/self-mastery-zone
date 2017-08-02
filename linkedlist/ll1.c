@@ -41,18 +41,30 @@ void print(struct node *head)
 
 void delete(struct node ** head,int k)
 {
-  struct node *temp =*head;
-  if(*head==NULL && k-1>0)
-    printf("NOt possible\n");
-  while (temp->next!=NULL && k-1>0)
-   {
-     temp= temp->next;
-     k--;
-  }
-  if(k-1>0)
-    printf("not permitted\n");
-  else
-    temp->next = temp->next->next;
+  struct node *temp =*head,*next;
+
+  if(temp == NULL)
+    return;
+
+  if(k==0)
+    {
+      *head=temp->next;
+      free(temp);
+      return;
+
+    }
+
+    for(int i=0; i<k-1 && temp!=NULL; i++)
+      temp=temp->next;
+
+    if(temp==NULL || temp->next ==NULL)
+      return;
+
+    next =  temp->next->next;
+    free(temp->next);
+
+    temp->next=next;
+
 
 }
 
