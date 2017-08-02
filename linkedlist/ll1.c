@@ -39,6 +39,23 @@ void print(struct node *head)
 
 }
 
+void delete(struct node ** head,int k)
+{
+  struct node *temp =*head;
+  if(*head==NULL && k-1>0)
+    printf("NOt possible\n");
+  while (temp->next!=NULL && k-1>0)
+   {
+     temp= temp->next;
+     k--;
+  }
+  if(k-1>0)
+    printf("not permitted\n");
+  else
+    temp->next = temp->next->next;
+
+}
+
 
 
 int main(int argc, char const *argv[])
@@ -48,6 +65,11 @@ int main(int argc, char const *argv[])
   insert(&head,20);
   insert(&head,30);
 
+
+
+print(head);
+delete(&head, 4);
+printf("\n");
 print(head);
 
   return 0;
