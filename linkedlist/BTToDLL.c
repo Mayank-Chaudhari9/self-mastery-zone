@@ -35,7 +35,7 @@ void inorder(struct node *root)
 
 void fixprev(struct node * root)
 {
-  struct node *prev=NULL;
+  static struct node *prev=NULL;
   if(root!=NULL)
   {
     fixprev(root->left);
