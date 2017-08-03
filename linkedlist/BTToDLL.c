@@ -33,6 +33,29 @@ void inorder(struct node *root)
 
 }
 
+void fixprev(struct node * root)
+{
+  struct node *prev=NULL;
+  if(root!=NULL)
+  {
+    fixprev(root->left);
+    root->left=prev;
+    prev=root;
+    fixprev(root->right);
+  }
+}
+
+struct node* fixnext(struct node* root)
+{
+  struct node * prev=NULL;
+}
+struct node* btll(struct node * root)
+{
+  fixprev(struct root);
+
+  return fixnext(root);
+}
+
 
 int main(int argc, char const *argv[]) {
   /* code */
@@ -54,7 +77,7 @@ int main(int argc, char const *argv[]) {
   inorder(root);
   printf("\n");
 
-  
+
 
 
   return 0;
