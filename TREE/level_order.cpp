@@ -33,8 +33,7 @@ void print_level(node *root)
   while(!q.empty())
   {
     node *val=q.front();
-    //q.pop();
-    //cout << "here" << endl;
+  
     cout<<val->data << " ";
     if(val->left!=NULL)
       q.push(val->left);
