@@ -48,12 +48,33 @@ void fixprev(struct node * root)
 struct node* fixnext(struct node* root)
 {
   struct node * prev=NULL;
+  while(root  && root->right!=NULL)
+    root=root->right;
+
+    while(root && root->left!=NULL)
+    {
+      prev =root;
+      root=root->left;
+      root->right=prev;
+    }
+
+    return (root);
+
 }
 struct node* btll(struct node * root)
 {
-  fixprev(struct root);
+  fixprev(root);
 
   return fixnext(root);
+}
+
+void printl(struct node * head)
+{
+  while(head!=NULL)
+  {
+    printf("%d\t",head->data );
+    head=head->right;
+  }
 }
 
 
@@ -76,6 +97,15 @@ int main(int argc, char const *argv[]) {
 
   inorder(root);
   printf("\n");
+
+
+
+  struct node *head = btll(root);
+
+  //printf("%d\n",head->data );
+
+printl(head);
+printf("\n");
 
 
 
