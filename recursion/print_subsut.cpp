@@ -11,7 +11,7 @@ void dist_ele(int a[], int n, int curr, unordered_set<int> &s)
 
 	if (curr == 0)
 	{
-		
+		cout << 
 	}
 
 
