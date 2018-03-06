@@ -1,0 +1,15 @@
+Ques 1: Create a java based chat server.In order to complete the assignment you need to perform 	following tasks.
+
+Task1: Multiple clients connect to the server.
+Task2: Seperate thread to handle each new incomming thread.
+Task3: The chat application is scalable to any no of users.
+Task4: Whenevr a new client is connected to server every other connected clients can see him/her 	in their terminal.
+Task5: Whenever a user send a msg it is shown on each clients terminal in following format.
+	<user> msg
+
+Task6: Inform all users when someone leaves the chatroom.
+
+(evry update should me real time update.)
+
+
+Hint : Synchronization, multithreading.  
